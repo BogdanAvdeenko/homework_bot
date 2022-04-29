@@ -1,6 +1,7 @@
 import logging
 import logging.config
 import os
+import sys
 import time
 from http import HTTPStatus
 
@@ -16,6 +17,10 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_TIME = 600
+DAYS_IN_MONTH = 30
+HOURS_IN_DAY = 24
+MIN_IN_HOUR = 60
+SEC_IN_MIN = 60
 
 HOMEWORK_VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
@@ -103,18 +108,17 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
-    days = 30
-    hours = 24
-    minutes = 60
-    seconds = 60
-    current_timestamp = int(time.time() - days * hours * minutes * seconds)
+    current_timestamp = int(
+        time.time() - DAYS_IN_MONTH
+        * HOURS_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN
+    )
     STATUS = ''
     ERROR_CACHE_MESSAGE = ''
     if not check_tokens():
         stream_logger.critical(
             'Недоступна одна или несколько переменных окружения'
         )
-        raise SystemExit
+        raise sys.exit(1)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     while True:
         try:
